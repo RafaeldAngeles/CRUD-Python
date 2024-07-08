@@ -1,29 +1,28 @@
 import psycopg2
+import json
 from config import DATABASE_NAME, DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, DATABASE_PORT
 
-# Conectar ao banco de dados
-conexao = psycopg2.connect(
-    database=DATABASE_NAME,
-    host=DATABASE_HOST,
-    user=DATABASE_USER,
-    password=DATABASE_PASSWORD,
-    port=DATABASE_PORT
-)
+def get_read(event):
+    
+    valor_produto = event["valor"]
+    nome_produto = event["nome_produto"]
+    
+    conexao = psycopg2.connect(
+        database=DATABASE_NAME,
+        host=DATABASE_HOST,
+        user=DATABASE_USER,
+        password=DATABASE_PASSWORD,
+        port=DATABASE_PORT
+    )
 
-cunn = conexao.cursor()
+    cunn = conexao.cursor()
 
-nomeProduto = "mouse"
-valor = 259
+    comando = f'SELECT * FROM vendas'
+    values = (nome_produto, valor_produto)
+    cunn.execute(comando, values)
+    resultado = cunn.fetchall()
 
-comando = f'SELECT * FROM vendas'
-cunn.execute(comando)
-resultado = cunn.fetchall()
+    cunn.close()
+    conexao.close()
 
-print(resultado)
-
-cunn.close()
-conexao.close()
-
-
-
-
+    return json.dumps(resultado, default=str)
